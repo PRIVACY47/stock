@@ -1,0 +1,336 @@
+{% extends "nav.html" %}
+{% block content %}
+{% load static%}
+
+<link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/all.css'%}">
+
+<div>
+  <div>
+
+    <div class="container">
+      <!-- Filter form -->
+      <style>
+        .filter-box {
+          background-color: lightblue;
+          padding: 20px;
+          margin: 10px 0px 10px 0px;
+          border-radius: 5px;
+          height: 100px;
+        }
+
+        .card-1 {
+          background-color: #FFADAD;
+          margin-bottom: 10px;
+        }
+
+        .card-2 {
+          background-color: #FFD6A5;
+          margin-bottom: 10px;
+        }
+
+        .card-3 {
+          background-color: #FDFFB6;
+          margin-bottom: 10px;
+        }
+
+        .card-4 {
+          background-color: #CAFFBF;
+          margin-bottom: 10px;
+        }
+
+        .card-5 {
+          background-color: #9BF6FF;
+          margin-bottom: 10px;
+        }
+
+        .hover-card:hover .card-body {
+          background-color: purple;
+        }
+      </style>
+
+      <div class="filter-box">
+        <form id="dashboard_form"  class="needs-validation" novalidate>
+          <div class="row">
+            <!-- <div class="col">
+              <div class="form-group">
+                <label for="filter">Filter</label>
+                <select name="filter" class="form-control" id="duration_filter" onchange="filter_data()">
+                  <option value="day">Day</option>
+                  <option value="week">Week</option>
+                  <option value="month">Month</option>
+                </select>
+              </div>
+            </div> -->
+            <div class="col">
+              <div class="form-group">
+                <label for="from">From</label>
+                <input type="date" name="from" id="from" class="form-control" value="1970-01-01" required>
+              </div>
+            </div>
+            <div class="col">
+              <div class="form-group">
+                <label for="to">To</label>
+                <input type="date" name="to" id="to" class="form-control" required>
+              </div>
+            </div>
+            <div class="col d-flex align-items-center">
+              <button type="button" class="btn btn-primary " id="dashboard_form_btn" onclick="fetch_dashboard_data()">Apply</button>
+              
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Dashboard cards -->
+      <div class="row">
+        <div class="col-sm-3">
+          <div class="card bg-secondary text-white card-1 hover-card">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fas fa-user"></i>
+                Total Users
+              </h5>
+              <h2 class="display-4 font-weight-bold" id="issues_count"> {{ users_count }}</h2>
+
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="card bg-success text-white card-2 hover-card">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fas fa-suitcase"></i>
+                Total Departments
+              </h5>
+              <h2 class="display-4 font-weight-bold" id="returns_count"> {{ dept_count }}</h2>
+
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="card bg-danger text-white card-3 hover-card">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fas fa-archive"></i>
+                Inside Terminal
+              </h5>
+              <h2 class="display-4 font-weight-bold">{{ inventory_count }}</h2>
+
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="card bg-warning text-white card-4 hover-card">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fas fa-calendar-times"></i>
+                Outside Terminal
+              </h5>
+              <h2 class="display-4 font-weight-bold" id="due_dates_passed">{{due_dates_passed}} </h2>
+
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-3">
+          <div class="card bg-info text-white card 5 hover-card">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fas fa-user-check"></i>
+                Inside Licence Area thru TLF Gate
+              </h5>
+              <h2 class="display-4 font-weight-bold"> {{ employees_issued }} </h2>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="graph-container mt-5" style="width: 50%;">
+      <div id="inventoryCards" style="display: none;">
+        {% for category, items in inventory.items %}
+        <div class="card-deck mt-4">
+          <div class="card border-primary mb-3">
+            <div class="card-header h4">{{ category }}</div>
+            <div class="card-body">
+              {% for item in items %}
+              <p class="card-text">{{ item.name }}: {{ item.quantity }}</p>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="container " hidden>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Category vs Issued Count</h5>
+              <canvas id="categoryIssuedChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Category vs Inventory Count</h5>
+              <canvas id="categoryInventoryChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Day-wise Issues and Returns</h5>
+              <canvas id="daywiseChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Week-wise Issues and Returns</h5>
+              <canvas id="weekwiseChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="{% static 'js/chart.js'%}"></script>
+<script src="{% static 'js/Chart.min.js'%}"></script>
+<script src="{% static 'js/jquery-3.2.1.slim.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js'%}"></script>
+
+
+<canvas id="inventoryChart"></canvas>
+
+
+<script>
+  const today = new Date();
+
+// Format the date as "YYYY-MM-DD" for the input type="date"
+const year = today.getFullYear();
+const month = String(today.getMonth() + 1).padStart(2, '0');
+const day = String(today.getDate()).padStart(2, '0');
+const formattedDate = `${year}-${month}-${day}`;
+
+// Set the value of the input element to today's date
+document.getElementById("to").value = formattedDate;
+
+
+// Add event listener to the button for validation handling
+document.getElementById('dashboard_form_btn').addEventListener('click', function (event) {
+    var form = document.getElementById('dashboard_form');
+    if (form.checkValidity()) {
+      // Form is valid, perform your desired action here
+      console.log('Form is valid. Performing action...');
+    } else {
+      event.preventDefault(); // Prevent default button action if validation fails
+      event.stopPropagation(); // Stop event propagation to prevent bubbling
+
+      // Add 'was-validated' class to display validation feedback
+      form.classList.add('was-validated');
+    }
+  });
+function fetch_dashboard_data(){
+var from_date=document.getElementById('from').value;
+var to_date=document.getElementById('to').value;
+
+  fetch('/fetch_dashboard_data/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for Django
+      },
+      body: JSON.stringify({ from_date: from_date,to_date:to_date })
+    })
+    .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        
+        document.getElementById('due_dates_passed').innerHTML = data.due_dates_passed;
+        document.getElementById('issues_count').innerHTML = data.issued_count;
+        document.getElementById('returns_count').innerHTML = data.return_count;
+      })
+      .catch(error => console.log("Error fetching items:", error));
+}
+  function send_data(days) {
+    fetch('/filter_data/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for Django
+      },
+      body: JSON.stringify({ days: days })
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        console.log(data.issued_count);
+        console.log(data.return_count);
+        console.log(data.due_dates_passed);
+        document.getElementById('due_dates_passed').innerHTML = data.due_dates_passed;
+        document.getElementById('issues_count').innerHTML = data.issued_count;
+        document.getElementById('returns_count').innerHTML = data.return_count;
+      })
+      .catch(error => console.log("Error fetching items:", error));
+  }
+  function filter_data() {
+    var duration_filter = document.getElementById('duration_filter').value;
+    console.log(duration_filter);
+    if (duration_filter == 'day') {
+      send_data(1);
+    }
+    else if (duration_filter == 'week') {
+      send_data(7);
+    }
+    else if (duration_filter == 'month') {
+      send_data(30);
+    }
+    else {
+      send_data(1);
+    }
+
+  }
+  fetch('/get_inventory_data_graph/')
+    .then(response => response.json())
+    .then(data => {
+      var ctx = document.getElementById('inventoryChart').getContext('2d');
+      var labels = data.map(row => row.category_name);
+      var quantities = data.map(row => row.total_quantity);
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Inventory Data',
+            data: quantities,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 4
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    })
+    .catch(error => console.error('Error:', error));
+
+</script>
+
+
+{% endblock %}

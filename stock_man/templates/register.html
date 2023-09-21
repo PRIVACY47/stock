@@ -1,0 +1,609 @@
+{% extends "nav.html" %}
+{% block content %}
+{% load static%}
+
+<link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/googleapisfonts.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/dataTables.min.css' %}">
+
+<div class="container">
+  <div class="row ">
+    <div class="col-md-12 mt-4">
+      
+      <div class="container my-6 " style="background-color: #33475b;">
+        <div class="p-2">
+          <div class="row">
+            <div class="col-9 d-flex h5 mt-2 text-light">
+              Search User
+            </div>
+            <div class="col-3 text-right">
+              <button class="btn text-white h5" data-bs-toggle="modal" data-bs-target="#userModal" id="createUserBtn">
+                <i class="fa fa-user"></i> Create User
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+  
+      <div class="card">
+        <form method="post" enctype="multipart/form-data" class="needs-validation" id="get_user_form" novalidate>
+          {% csrf_token %}
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-4">
+
+
+                <div class="form-group row">
+                  <label for="searchLabel" class="col-md-5 h5 text-align mt-2">Search By</label>
+                  <div class="col-sm-7">
+                    <select class="form-select" id="userType">
+                      <option value="name" selected>PIS Name</option>
+                      <option value="id">PIS ID</option>
+
+                    </select>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="col-md-4 ">
+                <div class="form-group row">
+
+                  <input type="text" class="form-control" id="searchInput" required>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="form-group row">
+                  <label for="statusLabel" class="col-md-4 h5 text-align mt-2">Status</label>
+                  <div class="col-sm-8">
+                    <select class="form-select" id="statusType">
+                      <option value="all">ALL</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">InActive</option>
+                      
+                    </select>
+                  </div>
+
+
+
+                </div>
+              </div>
+
+            </div>
+            <div class="row justify-content-center">
+              <div class="col-md-2">
+                <button  type="button" class="btn h5 text-white btn-color btn-outline-success" onclick="get_user()">Search</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="resetPasswordModalLabel"
+  aria-hidden="true">
+  <form method="post" enctype="multipart/form-data" class="needs-validation" id="reset_password_form" novalidate>
+    {% csrf_token %}
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="resetPasswordModalLabel">Reset Password</h5>
+          <button type="button" class="close " data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <input type="password" class="form-control" id="passwordInput" placeholder="Enter password" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-color text-white btn-outline-success"  data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-color text-white btn-outline-success" id="submitPassword">Submit</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel"
+  aria-hidden="true">
+  <form method="post" enctype="multipart/form-data" class="needs-validation" id="edit_user_form" novalidate>
+    {% csrf_token %}
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editUserModalLabel">User Details</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <div class="form-group">
+            <label for="usernameInput">Username</label>
+            <input type="text" class="form-control" id="usernameInput" placeholder="Enter Username" required>
+          </div>
+          <div class="form-group">
+            <label for="locationInput">Location</label>
+            <input type="text" class="form-control" id="locationInput" placeholder="Enter Location" required>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-color text-white btn-outline-success" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-color text-white btn-outline-success" id="submitUser">Submit</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<!-- Create User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel"
+  aria-hidden="true">
+  <form method="post" enctype="multipart/form-data" class="needs-validation" id="create_user_form" novalidate>
+    {% csrf_token %}
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="userModalLabel">Create User</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <div class="form-group">
+            <input type="text" class="form-control" id="nameModal" placeholder="PIS Name">
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-control" id="idModal" placeholder="PIS ID">
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-control" id="locationModal" placeholder="Location">
+          </div>
+          <div class="form-group">
+            <input type="password" class="form-control" id="passwordModal" placeholder="Password">
+          </div>
+          <div class="form-group">
+            <div class="btn-group-toggle" data-toggle="buttons">
+              <label class="btn btn-light active btn-outline-success">
+                <input type="radio" name="statusModal" value="active" checked> Active
+              </label>
+              <label class="btn btn-light btn-outline-danger">
+                <input type="radio" name="statusModal" value="inactive"> Inactive
+              </label>
+            </div>
+          </div>
+          
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-color text-white btn-outline-success" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-color text-white btn-outline-success" onclick="create_user()">Submit</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+
+
+
+<!-- Status Modal -->
+<div class="modal fade" id="changeStatusModal" tabindex="-1" role="dialog" aria-labelledby="changeStatusModalLabel"
+  aria-hidden="true">
+  <form method="post" enctype="multipart/form-data" class="needs-validation" id="change_status_form" novalidate>
+    {% csrf_token %}
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="changeStatusModalLabel">User Status</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <div class="form-group">
+            <label for="statusSelect">User Status</label>
+            <select class="form-select" id="statusSelect">
+              <option value="A">Activate User</option>
+              <option value="I">Deactivate User</option>
+            </select>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-color text-white btn-outline-success" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-color text-white btn-outline-success" id="submitStatus">Submit</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div id="search-results" class="container h5">
+  <div class="row">
+    <div class="col-md-12 mt-4">
+      <div class="container my-6 " style="background-color: #33475b;">
+        <div class="p-2">
+          <div class="row mt-2">
+            <div class="col-9 d-flex h5 text-center text-light">
+              Search Results
+            </div>
+            
+
+          </div>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered table-hover table-clickable" id="userTable">
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>User Name</th>
+              <th style="width: auto;">Status</th>
+              <th>Date of Registration</th>
+              <th>Location</th>
+              <th>Reset Password</th>
+              <th>Edit User</th>
+              <th>Activate/Deactivate User</th>
+
+            </tr>
+          </thead>
+          <tbody>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function check_validation(form_id, callback) {
+    var form = document.getElementById(form_id);
+    event.preventDefault(); // Prevent default form submission behavior
+
+    form.classList.add('was-validated'); // Trigger form validation
+    if (form.checkValidity()) {
+      // Form is valid, perform your desired action here
+      console.log('Form is valid. Performing action...');
+      callback(true);
+    } else {
+
+      callback(false);
+    }
+
+  }
+
+  function create_user() {
+    var name = document.getElementById('nameModal').value;
+    var id = document.getElementById('idModal').value;
+    var location = document.getElementById('locationModal').value;
+    var password = document.getElementById('passwordModal').value;
+    var status = document.getElementsByName('statusModal');
+    if (status[0].checked) {
+      status = "A";
+    }
+    else {
+      status = "I"
+    }
+    check_validation('create_user_form', function (isValid) {
+      if (isValid) {
+        fetch('/create_user/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for Django
+          },
+          body: JSON.stringify({ name: name, id: id, location: location, password: password, status: status })
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.hasOwnProperty('error')) {
+              alert(data.error);
+            }
+            else {
+              alert(data.success);
+              window.location.href = "{% url 'register' %}";
+            }
+          })
+          .catch(error => console.log("Error fetching items:", error));
+      }
+    });
+
+  }
+  createUserBtn.addEventListener('click', function () {
+    $('#userModal').modal('show');
+  });
+  function READ(index, j) {
+    console.log(index, j)
+    if (j == 1) {
+      $('#resetPasswordModal').modal('show');
+      submitPassword.addEventListener('click', function () {
+        check_validation('reset_password_form', function (isValid) {
+          if (isValid) {
+            var password = document.getElementById('passwordInput').value;
+            var tableBody = document.getElementById("userTable");
+            var empid = tableBody.rows[index+1].cells[0].textContent;
+            console.log(empid)
+            fetch('/reset_password/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for Django
+              },
+              body: JSON.stringify({ password: password, empid: empid })
+            })
+              .then(response => response.json())
+              .then(data => {
+                alert(data.success);
+                $('#resetPasswordModal').modal('hide');
+              })
+              .catch(error => console.log("Error fetching items:", error));
+          }
+        });
+
+      });
+
+
+    }
+
+      else if (j == 2) {
+    $('#editUserModal').modal('show');
+    var tableBody = document.getElementById("userTable");
+    var username = tableBody.rows[index+1].cells[1].textContent;
+    var location = tableBody.rows[index+1].cells[4].textContent;
+    var empid = tableBody.rows[index+1].cells[0].textContent;
+    document.getElementById('usernameInput').value=username;
+    document.getElementById('locationInput').value=location;
+    submitUser.addEventListener('click', function () {
+        check_validation('edit_user_form', function (isValid) {
+          if (isValid) {
+            var username = document.getElementById('usernameInput').value;
+            var location=document.getElementById('locationInput').value;
+            fetch('/edit_user/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for Django
+              },
+              body: JSON.stringify({ username: username, location: location ,empid:empid})
+            })
+              .then(response => response.json())
+              .then(data => {
+                
+                $('#editUserModal').modal('hide');
+                refresh_user();
+              })
+              .catch(error => console.log("Error fetching items:", error));
+          }
+        });
+
+      });
+  }
+  else {
+    $('#changeStatusModal').modal('show');
+    submitStatus.addEventListener('click', function () {
+        check_validation('change_status_form', function (isValid) {
+          if (isValid) {
+            var status = document.getElementById('statusSelect').value;
+            var tableBody = document.getElementById("userTable");
+            var empid = tableBody.rows[index+1].cells[0].textContent;
+            
+            fetch('/change_status/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for Django
+              },
+              body: JSON.stringify({ status:status,empid:empid })
+            })
+              .then(response => response.json())
+              .then(data => {
+                
+                $('#changeStatusModal').modal('hide');
+                refresh_user();
+              })
+              .catch(error => console.log("Error fetching items:", error));
+          }
+        });
+
+      });
+  }
+  }
+  function refresh_user(){
+    var searchInput = document.getElementById('searchInput').value;
+    var user_type = document.getElementById("userType").value;
+    var status_type = document.getElementById("statusType").value;
+    console.log(searchInput,user_type,status_type)
+    fetch('/search_user/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for Django
+          },
+          body: JSON.stringify({ searchInput: searchInput, user_type: user_type, status_type: status_type })
+        })
+          .then(response => response.json())
+          .then(data => {
+            const table = document.getElementById('userTable').getElementsByTagName('tbody')[0];
+            var tbody = document.querySelector("#userTable tbody");
+            tbody.innerHTML = "";
+            if ('error' in data[0]) {
+              alert("No such Records Available")
+            }
+            else {
+              data.forEach(function (item, index) {
+                const row = table.insertRow();
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                const cell3 = row.insertCell(2);
+                const cell4 = row.insertCell(3);
+                const cell5 = row.insertCell(4);
+                const cell6 = row.insertCell(5);
+                const cell7 = row.insertCell(6);
+                const cell8 = row.insertCell(7);
+                const btn_array = ["RP", "E", "A/D"]
+                const icon_array = ["fa-key", "fa-user-edit", "fa-toggle-on"]
+                var anc1 = document.createElement("a");
+                var icon1 = document.createElement("i");
+                icon1.classList.add("fas", icon_array[0]);  // Add Font Awesome classes
+                icon1.classList.add("ml-2");
+                icon1.style.display = "inline";  // Make buttons display as block elements
+                anc1.appendChild(icon1)
+                var anc2 = document.createElement("a");
+
+                var icon2 = document.createElement("i");
+                icon2.classList.add("fas", icon_array[1]);  // Add Font Awesome classes
+                icon2.classList.add("ml-2");
+                icon2.style.display = "inline";  // Make buttons display as block elements
+                anc2.appendChild(icon2)
+
+                var anc3 = document.createElement("a");
+                var icon3 = document.createElement("i");
+                icon3.classList.add("fas", icon_array[2]);  // Add Font Awesome classes
+                icon3.classList.add("ml-2");
+                icon3.style.display = "inline";  // Make buttons display as block elements
+                anc3.appendChild(icon3)
+
+                cell1.innerHTML = item.empid;
+                cell2.innerHTML = item.name;
+                cell3.innerHTML = item.status;
+                cell4.innerHTML = item.dated;
+                cell5.innerHTML = item.location;
+                cell6.appendChild(anc1);
+                cell6.addEventListener('click', function () {
+                  READ(index, 1);
+                });
+                cell7.appendChild(anc2);
+                cell7.addEventListener('click', function () {
+                  READ(index, 2);
+                });
+                cell8.appendChild(anc3);
+                cell8.addEventListener('click', function () {
+                  READ(index, 3);
+                });
+
+              });
+            }
+            if (!$.fn.DataTable.isDataTable('#userTable')) {
+              $('#userTable').DataTable({
+                lengthMenu: [5, 10, 25, 50], // Display options for number of records per page
+                pageLength: 10, // Default number of records per page
+                ordering: false, // Disable sorting
+                // Add more options as needed
+              });
+            }
+
+          })
+          .catch(error => console.log("Error fetching items:", error));
+  }
+  function get_user() {
+    var searchInput = document.getElementById('searchInput').value;
+    var user_type = document.getElementById("userType").value;
+    var status_type = document.getElementById("statusType").value;
+    console.log(searchInput,user_type,status_type)
+    check_validation('get_user_form', function (isValid) {
+      if (isValid) {
+        
+        fetch('/search_user/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token for Django
+          },
+          body: JSON.stringify({ searchInput: searchInput, user_type: user_type, status_type: status_type })
+        })
+          .then(response => response.json())
+          .then(data => {
+            const table = document.getElementById('userTable').getElementsByTagName('tbody')[0];
+            var tbody = document.querySelector("#userTable tbody");
+            tbody.innerHTML = "";
+            if ('error' in data[0]) {
+              alert("No such Records Available")
+            }
+            else {
+              data.forEach(function (item, index) {
+                const row = table.insertRow();
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                const cell3 = row.insertCell(2);
+                const cell4 = row.insertCell(3);
+                const cell5 = row.insertCell(4);
+                const cell6 = row.insertCell(5);
+                const cell7 = row.insertCell(6);
+                const cell8 = row.insertCell(7);
+                const btn_array = ["RP", "E", "A/D"]
+                const icon_array = ["fa-key", "fa-user-edit", "fa-toggle-on"]
+                var anc1 = document.createElement("a");
+                var icon1 = document.createElement("i");
+                icon1.classList.add("fas", icon_array[0]);  // Add Font Awesome classes
+                icon1.classList.add("ml-2");
+                icon1.style.display = "inline";  // Make buttons display as block elements
+                anc1.appendChild(icon1)
+                var anc2 = document.createElement("a");
+
+                var icon2 = document.createElement("i");
+                icon2.classList.add("fas", icon_array[1]);  // Add Font Awesome classes
+                icon2.classList.add("ml-2");
+                icon2.style.display = "inline";  // Make buttons display as block elements
+                anc2.appendChild(icon2)
+
+                var anc3 = document.createElement("a");
+                var icon3 = document.createElement("i");
+                icon3.classList.add("fas", icon_array[2]);  // Add Font Awesome classes
+                icon3.classList.add("ml-2");
+                icon3.style.display = "inline";  // Make buttons display as block elements
+                anc3.appendChild(icon3)
+
+                cell1.innerHTML = item.empid;
+                cell2.innerHTML = item.name;
+                cell3.innerHTML = item.status;
+                cell4.innerHTML = item.dated;
+                cell5.innerHTML = item.location;
+                cell6.appendChild(anc1);
+                cell6.addEventListener('click', function () {
+                  READ(index, 1);
+                });
+                cell7.appendChild(anc2);
+                cell7.addEventListener('click', function () {
+                  READ(index, 2);
+                });
+                cell8.appendChild(anc3);
+                cell8.addEventListener('click', function () {
+                  READ(index, 3);
+                });
+
+              });
+            }
+            if (!$.fn.DataTable.isDataTable('#userTable')) {
+              $('#userTable').DataTable({
+                lengthMenu: [5, 10, 25, 50], // Display options for number of records per page
+                pageLength: 10, // Default number of records per page
+                ordering: false, // Disable sorting
+                // Add more options as needed
+              });
+            }
+
+          })
+          .catch(error => console.log("Error fetching items:", error));
+      }
+    });
+  }
+</script>
+<!-- <script src="{% static 'js/dashboard.js' %}"></script> -->
+<script src="{% static 'js/jquery-3.2.1.slim.min.js' %}"></script>
+<script src="{% static 'js/popper.min.js' %}"></script>
+<script src="{% static 'js/bootstrap4.min.js' %}"></script>
+<script src="{% static 'js/dataTables.min.js' %}"></script>
+
+{% endblock %}

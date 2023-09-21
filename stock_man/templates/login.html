@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+{% load static%}
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap-4.5.2.min.css' %}">
+    
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="text-center ">Login</h5>
+                    </div>
+                    <div class="card-body bg-secondary text-white">
+                        {% if error %}
+                            <div class="alert alert-danger">
+                                {{ error }}
+                            </div>
+                        {% endif %}
+                        <form method="POST" action="{% url 'login' %}">
+                            {% csrf_token %}
+                            <div class="form-group ">
+                                <label for="username" class="h5">User ID:</label>
+                                <input type="text" class="form-control border-dark h5" id="username" name="username" required>
+                            </div>
+                            <div class="form-group border-dark h5">
+                                <label for="password">Password:</label>
+                                <input type="password" class="form-control border-dark h5" id="password" name="password" required>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-color btn-outline-success text-white border-dark">Login</button>
+                            </form>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1048 @@
+{% extends "nav.html" %} {% block content %} {% load static%}
+
+<link rel="stylesheet" href="{% static 'css/all.min.css' %}" />
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+<link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+<link rel="stylesheet" href="{% static 'css/googleapisfonts.css' %}" />
+
+<div class="container mt-2 mb-2">
+  <div class="container my-6" style="background-color: #33475b">
+    <div class="p-2">
+      <div class="row">
+        <div class="col-9 d-flex h7 mt-2 text-light">Issue Stock</div>
+
+        <div class="col-auto text-right">
+          <button
+            type="button"
+            id="addItemBtn"
+            onclick="add_btn()"
+            name="add"
+            class="btn h7 text-white"
+          >
+            <i class="fa fa-bold fa-plus" style="font-size: large"></i> Add
+            Category/Item
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <form
+    method="post"
+    enctype="multipart/form-data"
+    class="needs-validation"
+    novalidate
+    id="issues_stock_form"
+  >
+    {% csrf_token %}
+    <div class="border border-dark p-2 bg-light rounded">
+      <div class="form-group">
+        <div class="row g-3 gy-3">
+          <div class="col-6 h7 text-dark form-inline">
+            <div class="form-group">
+              <label for="id"> Employee ID</label>
+              <input
+                type="text"
+                class="rounded ml-2 border-dark"
+                id="empid"
+                name="empid"
+                title="Please enter a valid ID."
+                placeholder="Enter Employee ID"
+                required
+              />
+            </div>
+          </div>
+          <div class="col-4 h7 ml-3 text-dark form-inline">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input
+                type="text"
+                class="rounded ml-2 border-dark"
+                id="empname"
+                name="empname"
+                title="Please enter a valid Name."
+                placeholder="Enter Employee Name"
+                required
+              />
+            </div>
+          </div>
+        </div>
+        <div class="row mt-2">
+          <div class="col-6 h7 text-dark form-inline">
+            <div class="form-group">
+              <label for="mobile">Mobile No </label>
+              <input
+                type="number"
+                class="rounded ml-4 border-dark"
+                id="mobile"
+                name="mobile"
+                title="Please enter a valid Number."
+                placeholder="Enter Mobile Number"
+                required
+              />
+            </div>
+          </div>
+          <div class="col-4 h7 text-dark form-inline">
+            <div class="form-group">
+              <label for="location">Location </label>
+              <input
+                type="text"
+                class="rounded ml-2 border-dark"
+                id="location"
+                name="location"
+                title="Please enter a valid Location."
+                placeholder="Enter Location"
+                required
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container border border-dark p-2 bg-light rounded">
+      <div class="row">
+        <div class="col-4 align-items-center justify-content-center">
+          <div class="form-group d-flex align-items-center">
+            <div class="col-3">
+              <label class="mr-2" for="Category"> Category</label>
+            </div>
+            <div class="col-8">
+              <select
+                class="form-control form-select border-dark"
+                id="Category"
+                name="Category"
+                onchange="loadItemsSm()"
+                required
+              >
+                <option value="">Select a category</option>
+                {% for key,val in categories.items %}
+                <option value="{{key}}">{{ val}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group d-flex align-items-center">
+            <div class="col-3">
+              <label for="item">Item</label>
+            </div>
+            <div class="col-8">
+              <select
+                class="form-control form-select border-dark"
+                id="Item"
+                name="Item"
+                required
+              >
+                <option value="">Select an Item</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group d-flex align-items-center">
+            <div class="col-3">
+              <label for="qty">Quantity </label>
+            </div>
+            <div class="col-8">
+              <input
+                type="number"
+                class="form-control border-dark"
+                id="Qty"
+                name="Qty"
+                title="Please enter a valid Quantity."
+                placeholder="Enter Quantity"
+                required
+              />
+            </div>
+          </div>
+          <div class="form-group d-flex align-items-center">
+            <div class="col-3">
+              <label for="remarks">Remarks</label>
+            </div>
+            <div class="col-12">
+              <input
+                type="text"
+                class="form-control border-dark"
+                placeholder="Enter Remarks"
+                id="Remarks"
+                name="Remarks"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="col-1 border-right border-dark"></div>
+        <div class="col-3 ml-1 align-items-center">
+          <div class="row">
+            <button
+              type="button"
+              id="startcam"
+              class="btn h5 text-white btn-color btn-outline-success"
+            >
+              Take Photo
+            </button>
+          </div>
+          <div class="row">
+            <button
+              type="button"
+              id="capture"
+              style="display: none"
+              class="btn h5 text-white btn-color btn-outline-success"
+            >
+              Capture
+            </button>
+          </div>
+          <div class="row">
+            <button
+              type="button"
+              id="add_item"
+              class="btn h5 text-dark btn-color btn-outline-success"
+              onclick="addStockToIssue()"
+              disabled
+            >
+              Add Item
+            </button>
+          </div>
+        </div>
+        <div class="col-3">
+          <video
+            id="webcam"
+            autoplay
+            style="width: 100%; max-width: 300px; height: 200px; display: none"
+          ></video>
+          <img
+            id="capturedImage"
+            style="max-width: 300px; height: 200px; display: none"
+          />
+        </div>
+      </div>
+      <div class="row"></div>
+    </div>
+  </form>
+  <div class="border border-dark p-2 bg-light rounded">
+    <div class="container">
+      <div class="row">
+        <div class="col-12 text-center justify-content-center h5 text-dark">
+          ASSIGNED ITEMS
+          <hr style="font-weight: bold; height: 2px; background-color: black" />
+        </div>
+      </div>
+      <div class="row">
+        <form
+          method="post"
+          enctype="multipart/form-data"
+          class="needs-validation"
+          id="issue_item_form"
+          novalidate
+        >
+          {% csrf_token %}
+          <div class="input-group mr-sm-2"></div>
+          <table
+            id="issue_item"
+            class="table table-bordered border border-3 border-black"
+          >
+            <thead>
+              <tr class="h5">
+                <th>Category</th>
+                <th>Item</th>
+                <th>QR ID</th>
+                <th>Remarks</th>
+                <th>Issue Quantity</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody class="h5 border border-black border-2" id="tableBody">
+              <!-- rows will be added here dynamically -->
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal fade"
+  id="printSmModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="printSmModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h7 class="modal-title" id="printSmModalLabel">Print QR Code</h7>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="printSmPosition">Print Position:</label>
+          <input
+            type="number"
+            id="printSmPosition"
+            min="1"
+            max="18"
+            title="Please enter a number between 1 and 18"
+          />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn h7 text-white btn-color btn-outline-success"
+          data-dismiss="modal"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="btn h7 text-white btn-color btn-outline-success"
+          id="printSmBtn"
+          onclick="handlePrintSm()"
+        >
+          Print
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="ItemModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="ItemModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h7 class="modal-title" id="ItemModalLabel">Add Category/Item</h7>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container my-6 mt-2" style="background-color: #33475b">
+          <div class="p-2">
+            <div class="row">
+              <div class="col-12 d-flex text-centre h7 text-light">
+                Add Category
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="border p-3 mb-8 bg-secondary">
+          <form
+            class="form-inline needs-validation"
+            method="POST"
+            id="categorySm"
+            novalidate
+          >
+            {% csrf_token %}
+            <div class="input-group mb-2 mr-sm-2">
+              <div class="input-group-prepend">
+                <label class="input-group h7 mr-2 text-white" for="categorySm"
+                  >Category</label
+                >
+              </div>
+              <div class="input-group-prepend">
+                <input
+                  type="text"
+                  class="form-control h7 border-dark"
+                  name="categorySm"
+                  id="categorySm_data"
+                  required
+                />
+              </div>
+              <div class="input-group-prepend ml-2">
+                <button
+                  type="button"
+                  onclick="addtocategorySm()"
+                  class="btn h7 text-white btn-color btn-outline-success mb-2"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="container my-6" style="background-color: #33475b">
+          <div class="p-2">
+            <div class="row">
+              <div class="col-4 d-flex text-centre h7 text-light">Add Item</div>
+            </div>
+          </div>
+        </div>
+        <div class="border p-3 mb-2 bg-secondary" style="margin-bottom: 50px">
+          <form
+            class="form-inline needs-validation"
+            id="itemSmForm"
+            method="POST"
+            novalidate
+          >
+            {% csrf_token %}
+            <div class="input-group mb-2 mr-sm-2">
+              <div class="input-group-prepend mr-2">
+                <label class="input-group text-white h7" for="CategorySm"
+                  >Category</label
+                >
+              </div>
+              <div class="input-group-prepend">
+                <select
+                  class="form-select h7 border-dark"
+                  id="CategorySm"
+                  name="CategorySm"
+                  required
+                >
+                  <option value="">Select a category</option>
+                  {% for key,value in categories.items %}
+                  <option value="{{value}}">{{ value}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="input-group mb-2 mr-sm-2">
+              <div class="input-group-prepend mr-2">
+                <label class="input-group text-white h7" for="ItemSm"
+                  >Item Name</label
+                >
+              </div>
+              <div class="input-group-prepend">
+                <input
+                  type="text"
+                  class="form-control h7 border-dark"
+                  name="itemSm_name"
+                  id="itemSm_name"
+                  placeholder="Enter Item Name"
+                  required
+                />
+              </div>
+            </div>
+            <div class="input-group mb-2 mr-sm-2">
+              <div class="input-group-prepend ml-2">
+                <button
+                  type="button"
+                  id="add-item-btnSm"
+                  onclick="addItemSm()"
+                  name="addItem"
+                  class="btn h7 text-white btn-color btn-outline-success"
+                >
+                  Add Item
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn h7 text-white btn-color rounded btn-outline-success"
+          data-dismiss="modal"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="EditModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="EditModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h7 class="modal-title" id="EditModalLabel">Edit Entry</h7>
+        <h9 id="hidden_index" hidden></h9>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container my-6 mt-2" style="background-color: #33475b">
+          <div class="p-2">
+            <div class="row">
+              <div class="col-12 d-flex text-centre h7 text-light">
+                Edit Issue Entry
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="border p-3 mb-8 bg-secondary">
+          <form
+            class="form-inline needs-validation"
+            method="POST"
+            id="EditEntrySm"
+            novalidate
+          >
+            {% csrf_token %}
+            <div class="input-group mb-2 mr-sm-2">
+              <div class="input-group-prepend">
+                <label class="input-group h7 mr-2 text-white" for="RemarksSm"
+                  >Remarks</label
+                >
+              </div>
+              <div class="input-group-prepend">
+                <input
+                  type="text"
+                  class="form-control h7 border-dark"
+                  name="RemarksSm"
+                  id="RemarksSm_data"
+                  required
+                />
+              </div>
+              <div class="input-group-prepend">
+                <label class="input-group h7 mr-2 ml-2 text-white" for="RemarksSm"
+                  >Quantity</label
+                >
+              </div>
+              <div class="input-group-prepend">
+                <input
+                  type="text"
+                  class="form-control h7 border-dark"
+                  name="QtySm"
+                  id="QtySm_data"
+                  required
+                />
+              </div>
+             
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn h7 text-white btn-color rounded btn-outline-success"
+          data-dismiss="modal" id="close_btn"
+        >
+          Close
+        </button>
+        <button
+          type="button"
+          class="btn h7 text-white btn-color rounded btn-outline-success"
+          onclick="editItemEntrySm()"
+          
+        >
+          Edit
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+
+  const webcamElement = document.getElementById("webcam");
+  var startcam = document.getElementById("startcam");
+  var captureButton = document.getElementById("capture");
+  const capturedImageElement = document.getElementById("capturedImage");
+
+  let stream = null;
+  async function startWebcam() {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      webcamElement.srcObject = stream;
+      capturedImageElement.style.display = "none";
+      webcamElement.style.display = "block"; // Show the video element
+      startcam.style.display = "none"; // Hide the button
+      captureButton.style.display = "block";
+      var add_btn = document.getElementById("add_item");
+      add_btn.disabled = true;
+    } catch (error) {
+      console.error("Error accessing webcam:", error);
+    }
+  }
+  startcam.addEventListener("click", startWebcam);
+  captureButton.addEventListener("click", () => {
+    var add_btn = document.getElementById("add_item");
+    if (stream) {
+      const canvas = document.createElement("canvas");
+      canvas.width = webcamElement.videoWidth;
+      canvas.height = webcamElement.videoHeight;
+      const canvasContext = canvas.getContext("2d");
+      canvasContext.drawImage(webcamElement, 0, 0, canvas.width, canvas.height);
+      capturedImageElement.src = canvas.toDataURL("image/jpeg");
+      capturedImageElement.style.display = "block";
+      webcamElement.style.display = "none";
+      captureButton.style.display = "none";
+      stream.getTracks().forEach((track) => track.stop());
+      startcam.style.display = "block";
+      add_btn.removeAttribute("disabled");
+      add_btn.style.color = "white";
+    }
+  });
+</script>
+
+<script>
+    var table = document.getElementById('issue_item');
+
+    // Add a click event listener to the table
+    table.addEventListener('click', function(event) {
+        // Check if the clicked element is a button in the last column
+        if (event.target.tagName === 'BUTTON' && 
+            event.target.parentElement === event.target.parentElement.parentElement.lastElementChild) {
+                var row = event.target.closest('tr');
+                var rowIndex = row.rowIndex;
+                
+                var buttonId = event.target.getAttribute('id');
+                console.log(buttonId,rowIndex);
+                // Perform an action based on the buttonId
+                switch (buttonId) {
+                    case 'btn1':
+                        edit_stock(rowIndex);
+                        break;
+                    case 'btn2':
+                        delete_stock(rowIndex);
+                        break;
+                    case 'btn3':
+                        issue_stock(rowIndex);
+                        break;
+                    default:
+                        // Handle other cases if needed
+                        break;
+                }
+        }
+    });
+
+    
+
+  function add_btn() {
+    $("#ItemModal").modal("show");
+  }
+  function check_validation(form_id, callback) {
+    var form = document.getElementById(form_id);
+    event.preventDefault(); // Prevent default form submission behavior
+
+    form.classList.add("was-validated"); // Trigger form validation
+    if (form.checkValidity()) {
+      // Form is valid, perform your desired action here
+      console.log("Form is valid. Performing action...");
+      callback(true);
+    } else {
+      callback(false);
+    }
+  }
+  function addtocategorySm() {
+    check_validation("categorySm", function (isValid) {
+      if (isValid) {
+        var category = document.getElementById("categorySm_data").value;
+        fetch("/addtocategory_request/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}", // Include CSRF token for Django
+          },
+          body: JSON.stringify({ category: category }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            alert(data.success);
+            var categoryDropdown = document.getElementById("CategorySm");
+            var option = document.createElement("option");
+            option.value = data.name;
+            option.text = data.name;
+            categoryDropdown.appendChild(option);
+          })
+          .catch((error) => console.log("Error fetching items:", error));
+      }
+    });
+  }
+  function addItemSm() {
+    check_validation("itemSmForm", function (isValid) {
+      if (isValid) {
+        var category_name = document.getElementById("CategorySm").value;
+        var item_name = document.getElementById("itemSm_name").value;
+        // var qty = document.getElementById('itemSm_qty').value;
+        console.log(category_name, item_name);
+        fetch("/add_item_view/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}", // Include CSRF token for Django
+          },
+          body: JSON.stringify({
+            category_name: category_name,
+            item_name: item_name,
+            type: "G",
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            if (data.success == "Item already exists") {
+              alert(data.success);
+            } else {
+              alert(data.success);
+
+              window.location.href = "{% url 'issue_stock' %}";
+            }
+          })
+          .catch((error) => console.log("Error fetching items:", error));
+      }
+    });
+  }
+  function handlePrintSm() {
+    // Get the entered text and selected position
+
+    var position = document.getElementById("printSmPosition").value;
+    var item = document.getElementById("Item").value;
+    if (position > 18 || position < 1) {
+      alert("Kindly enter between 1 to 18 only");
+    } else {
+      // Generate the QR code image element
+      fetch("/generate_pdf_qr_receive/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}", // Include CSRF token for Django
+        },
+        body: JSON.stringify({ item: item, position: position }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          $("#printSmModal").hide();
+
+          // alert(data.success);
+          // console.log(item_name);
+          window.open("{% static 'pdfs/' %}" + "QR_Code" + ".pdf");
+          window.location.href = "{% url 'issue_stock' %}";
+        })
+        .catch((error) => console.log("Error fetching items:", error));
+    }
+  }
+
+  function isDataInTable(data) {
+    // Loop through table rows and check if the data is present
+    const tableBody = document.getElementById("tableBody");
+    const rows = tableBody.getElementsByTagName("tr");
+    for (const row of rows) {
+      const cell = row.getElementsByTagName("td")[2];
+      if (cell && cell.textContent === data) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function addStockToIssue() {
+    check_validation("issues_stock_form", function (isValid) {
+      if (isValid) {
+        var category = document.getElementById("Category").value;
+        var item = document.getElementById("Item").value;
+        var qty = document.getElementById("Qty").value;
+        // var empid = document.getElementById("empid").value;
+        // var empname = document.getElementById("empname").value;
+        // var mobile = document.getElementById("mobile").value;
+        // var location = document.getElementById("location").value;
+        // var photo = document.getElementById("capturedImage");
+        var remarks = document.getElementById("Remarks").value;
+        // photo_file = photo.files[0]
+        const formData = new FormData();
+        formData.append("category", category);
+        formData.append("item", item);
+        formData.append("qty", qty);
+        // formData.append('empid', empid);
+        // formData.append('empname', empname);
+        // formData.append('mobile', mobile);
+        // formData.append('location', location);
+        // formData.append('photo', photo_file);
+        // formData.append('remarks', remarks);
+        fetch("/issue_stock_view/", {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": "{{ csrf_token }}", // Include CSRF token for Django
+          },
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            if (data.success == "Inventory Available") {
+              const table = document
+                .getElementById("issue_item")
+                .getElementsByTagName("tbody")[0];
+              var tbody = document.querySelector("#issue_item tbody");
+              // tbody.innerHTML = "";
+              const rows = document.getElementById("issue_item").rows.length;
+              console.log(rows);
+              if (rows < 2) {
+                const row = table.insertRow();
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                const cell3 = row.insertCell(2);
+                const cell4 = row.insertCell(3);
+                const cell5 = row.insertCell(4);
+                const cell6 = row.insertCell(5);
+                const button1 = document.createElement("button");
+                button1.type = "button";
+                button1.setAttribute("id", "btn1");
+                button1.classList.add(
+                  "btn",
+                  "btn-color",
+                  "h5",
+                  "btn-outline-success",
+                  "text-white"
+                ); // Add Bootstrap button classes
+                
+                // Set button text
+                button1.textContent = "Edit";
+                const button2 = document.createElement("button");
+                button2.type = "button";
+                button2.setAttribute("id", "btn2");
+                button2.classList.add(
+                  "btn",
+                  "btn-color",
+                  "h5",
+                  "btn-outline-success",
+                  "text-white",
+                  "ml-2"
+                ); // Add Bootstrap button classes
+                
+                // Set button text
+                button2.textContent = "Delete";
+                const button3 = document.createElement("button");
+                button3.type = "button";
+                button3.setAttribute("id", "btn3");
+                button3.classList.add(
+                  "btn",
+                  "btn-color",
+                  "h5",
+                  "btn-outline-success",
+                  "text-white",
+                  "ml-2"
+                ); // Add Bootstrap button classes
+                
+                // Set button text
+                button3.textContent = "Issue";
+
+                cell1.innerHTML = data.category;
+                cell2.innerHTML = data.item; // Assuming your JSON has 'email' field
+                cell3.innerHTML = data.qrid; // Assuming your JSON has 'email' field
+                cell4.innerHTML = remarks;
+                cell5.innerHTML = data.qty;
+                cell6.appendChild(button1);
+                cell6.appendChild(button2);
+                cell6.appendChild(button3);
+              } else {
+                if (isDataInTable(item)) {
+                  console.log("data present");
+                } else {
+                  console.log("data not present");
+                  const row = table.insertRow();
+                  const cell1 = row.insertCell(0);
+                  const cell2 = row.insertCell(1);
+                  const cell3 = row.insertCell(2);
+                  const cell4 = row.insertCell(3);
+                  const cell5 = row.insertCell(4);
+                  const cell6 = row.insertCell(5);
+                  const button1 = document.createElement("button");
+                  button1.type = "button";
+                  button1.setAttribute("id", "btn1");
+                  button1.classList.add(
+                    "btn",
+                    "btn-color",
+                    "h5",
+                    "btn-outline-success",
+                    "text-white"
+                  ); // Add Bootstrap button classes
+                  
+                  // Set button text
+                  button1.textContent = "Edit";
+                  const button2 = document.createElement("button");
+                  button2.type = "button";
+                  button2.setAttribute("id", "btn2");
+                  button2.classList.add(
+                    "btn",
+                    "btn-color",
+                    "h5",
+                    "btn-outline-success",
+                    "text-white",
+                    "ml-2"
+                  ); // Add Bootstrap button classes
+                  
+                  // Set button text
+                  button2.textContent = "Delete";
+                  const button3 = document.createElement("button");
+                  button3.type = "button";
+                  button3.setAttribute("id", "btn3");
+                  button3.classList.add(
+                    "btn",
+                    "btn-color",
+                    "h5",
+                    "btn-outline-success",
+                    "text-white",
+                    "ml-2"
+                  ); // Add Bootstrap button classes
+                  
+                  // Set button text
+                  button3.textContent = "Issue";
+                  cell1.innerHTML = data.category;
+                  cell2.innerHTML = data.item; // Assuming your JSON has 'email' field
+                  cell3.innerHTML = data.qrid; // Assuming your JSON has 'email' field
+                  cell4.innerHTML = remarks;
+                  cell5.innerHTML = data.qty;
+                  cell6.appendChild(button1);
+                  cell6.appendChild(button2);
+                  cell6.appendChild(button3);
+                }
+              }
+            } else {
+              alert(data.success);
+            }
+          })
+          .catch((error) => console.log("Error fetching items:", error));
+      }
+    });
+  }
+
+  function loadItemsSm() {
+    var category = document.getElementById("Category").value;
+    console.log(category);
+
+    if (category == "") {
+    } else {
+      fetch("/get_items/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}", // Include CSRF token for Django
+        },
+        body: JSON.stringify({ category: category }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          // Populate the item dropdown with the fetched items
+          var itemDropdown = document.getElementById("Item");
+          itemDropdown.innerHTML = "<option value=''>Select an item</option>";
+          console.log(data);
+          if (typeof data.length === "undefined") {
+            alert(data.error);
+          }
+          data.forEach(function (item) {
+            var option = document.createElement("option");
+            option.value = item.qr_id;
+            option.text = item.item_name;
+            itemDropdown.appendChild(option);
+          });
+        })
+        .catch((error) => console.log("Error fetching items:", error));
+    }
+  }
+
+  function edit_stock(index) {
+
+    var table = document.getElementById('issue_item'); // use the ID of your table
+    const rows = table.getElementsByTagName('tr');
+    const checkboxCellIndex = 0;
+    var Row = table.rows[index];
+    const category_name = Row.cells[0].innerText;
+    const item_name = Row.cells[1].innerText;
+    const qr_id = Row.cells[2].innerText;
+    const remarks= Row.cells[3].innerText;
+    const issue_qty = Row.cells[4].innerText;
+    $("#EditModal").modal("show");
+    document.getElementById('RemarksSm_data').value=remarks;
+    document.getElementById('QtySm_data').value=issue_qty;
+    document.getElementById('hidden_index').value=index;
+    
+    
+  }
+  function editItemEntrySm(){
+    index=document.getElementById('hidden_index').value;
+    remarks=document.getElementById('RemarksSm_data').value;
+    qty=document.getElementById('QtySm_data').value;
+    var table = document.getElementById('issue_item'); // use the ID of your table
+    const rows = table.getElementsByTagName('tr');
+    const checkboxCellIndex = 0;
+    var Row = table.rows[index];
+    Row.cells[3].innerText=remarks;
+    Row.cells[4].innerText=qty;
+    const formData = new FormData();
+    formData.append("qrid",parseInt(Row.cells[2].innerText))
+    formData.append("qty", qty);
+    fetch("/check_inventory/", {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": "{{ csrf_token }}", // Include CSRF token for Django
+              },
+              body: formData,
+            })
+              .then((response) => response.json())
+    .then((data) => {
+      if (data.success=="Inventory Available"){
+        if (Row.cells[3].innerText==="" || Row.cells[4].innerText===""){
+          alert("Kindly enter data completely");
+        }
+        else if (parseInt(Row.cells[4].innerText)<=0){
+          alert("Kindly enter Valid Quantity")
+        }else{
+          const closeModalButton = document.querySelector('#close_btn');
+        console.log(closeModalButton);
+        closeModalButton.click();
+
+        }
+
+      }
+      else {
+        alert("Inventory not available. Kindly correct the quantity")
+      }
+
+    });
+    
+    
+
+  }
+  function delete_stock(index) {
+    var table = document.getElementById('issue_item'); // use the ID of your table
+    const rows = table.getElementsByTagName('tr');
+    const checkboxCellIndex = 0;
+    
+    table.deleteRow(index);
+  }
+  function issue_stock(index) {
+    var table = document.getElementById('issue_item'); // use the ID of your table
+    const rows = table.getElementsByTagName('tr');
+    const checkboxCellIndex = 0;
+    var Row = table.rows[index];
+    const category_name = Row.cells[0].innerText;
+    const item_name = Row.cells[1].innerText;
+    const qr_id = Row.cells[2].innerText;
+    const remarks= Row.cells[3].innerText;
+    const issue_qty = Row.cells[4].innerText;
+    
+  }
+</script>
+<script src="{% static 'js/mfs100.js'%}"></script>
+
+<script src="{% static 'js/Chart.min.js' %}"></script>
+<script src="{% static 'js/jquery-1.8.2.js' %}"></script>
+<script src="{% static 'js/bootstrap4.min.js' %}"></script>
+
+{% endblock %}

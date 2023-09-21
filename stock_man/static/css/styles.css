@@ -1,0 +1,78 @@
+/* Custom table styles */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  .circle-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ccc;
+    color: #fff;
+    font-size: 18px;
+    display: inline-block;
+    text-align: center;
+    line-height: 40px;
+    margin-right: 10px;
+  }
+  .btn-color{
+    background-color: #33475b;
+  }  
+  .table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+  }
+  
+  .table tbody tr:nth-of-type(even) {
+    background-color: #f8f9fa;
+  }
+  
+  .table-hover tbody tr:hover {
+    background-color: #e9ecef;
+    cursor: pointer;
+  }
+  
+  .table-bordered {
+    border: 1px solid #dee2e6;
+  }
+  
+  .table-bordered th,
+  .table-bordered td {
+    border: 1px solid #dee2e6;
+  }
+  
+  .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f8f9fa;
+  }
+  
+  .table-responsive {
+    overflow-x: auto;
+  }
+  
+  /* Additional Bootstrap table classes */
+  .table-striped tbody tr:nth-of-type(even) {
+    background-color: #f1f1f1;
+  }
+  
+  .table-hover tbody tr:hover {
+    background-color: #e9ecef;
+    cursor: pointer;
+  }
+  
+  /* Interactivity */
+  .table-clickable tbody tr:hover {
+    background-color: #e9ecef;
+  }
+  
+  /* Add any additional custom styles as needed */
+  

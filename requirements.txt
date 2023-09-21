@@ -1,0 +1,4 @@
+pandas
+pypyodbc
+bcrypt
+django-pyodbc

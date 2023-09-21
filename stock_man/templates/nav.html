@@ -1,0 +1,200 @@
+{% load static%}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Stock Management</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap-4.5.2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/all.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-5.3.0.min.css' %}"> 
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/fa/webfonts/fa-solid-900.ttf' %}">
+
+</head>
+<style>
+    /* Add custom CSS for menu items */
+    .nav-item {
+        position: relative;
+        padding-bottom: 10px;
+    }
+
+    .nav-item::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 3px;
+        height: 100%;
+        background-color: transparent;
+        transition: background-color 0.3s;
+    }
+
+
+
+    .nav-link {
+        position: relative;
+        color: #333;
+        transition: color 0.3s;
+        padding-left: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-color {
+        background-color: #33475b;
+    }
+
+    .bg-color {
+        background-color: #c9d3dd;
+    }
+
+    .nav-link:hover {
+        color: #fff;
+        background-color: #028FA2;
+        text-decoration: none;
+    }
+
+    .nav-link.active::before {
+        background-color: #007bff;
+    }
+
+    .toggle-icon {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: transform 0.3s;
+    }
+
+    .collapse.show~.toggle-icon {
+        transform: translateY(-50%) rotate(-90deg);
+    }
+
+    .nav-link .fa {
+        margin-right: 10px;
+    }
+
+    /* Indentation for submenu items */
+    .submenu {
+        padding-left: 20px;
+    }
+
+    /* Font size for submenu items */
+
+
+    .nav-link i {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+    }
+</style>
+
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top" style="background-color:#33475b; height: 70px;">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-user ml-2" style="color: #fff; font-size: 40px;"></i>
+        </a>
+        <span class="navbar-text text-white mr-auto d-block h7">Logged in as:
+            <strong>{{username}}<br> </strong>Employee ID: <strong>{{ empid }}</strong></span>
+        <span class="navbar-text text-white mr-auto h3 mt-1"> Stock Management System</span>
+
+        <div class="navbar-text  mt-1">
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button class="mr-2 btn h7 text-white btn-color btn-outline-success"><i
+                        class="fas fa-sign-out-alt "></i> Logout</button>
+            </form>
+            <i class="fas fa-map-marker-alt  " style="color: #fff;"></i>
+            <span class="text-white h7 mr-4 mb-2">{{location }}</span>
+
+        </div>
+    </nav>
+
+
+    <!-- Left Menu -->
+    <div class="row">
+        <nav class="col-lg-3 sidebar" style="background-color:#33475b; width: 230px;">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column h7">
+                    <li class="nav-item">
+                        <a class="nav-link h7 text-light" href="{% url 'dashboard' %}">
+                            <i class="fas fa-chart-bar"></i>Dashboard
+                        </a>
+                    </li>
+                    {% if "admin" in empid %}
+                    <li class="nav-item">
+                        <a class="nav-link h7 text-light" href="{% url 'register' %}">
+                            <i class="fas fa-users"></i>User Management
+                        </a>
+                    </li>
+                    {% else %}
+                    <a></a>
+                    {% endif %}
+
+                    <li class="nav-item">
+                        <a class="nav-link h6 text-light" href="{% url 'stock_master' %}"><i
+                                class="fas fa-toolbox"></i>Stock Master</a>
+                    </li>
+
+                   
+                    <li class="nav-item">
+                        <a class="nav-link h6 text-light" href="{% url 'issue_stock' %}"><i
+                                class="fas fa-toolbox"></i>Issue Stock</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link h7 text-light" href="{% url 'receive_stock' %}"><i class="fas fa-undo"></i>
+                            Recieve Stock</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link h7 text-light" href="{% url 'request_stock' %}"><i
+                                class="fas fa-arrow-circle-up"></i>Request Stock</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link h7 text-light" href="{% url 'qr_code' %}"><i
+                                class="fas fa-qrcode"></i>Generate QR</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link active h7 text-light" data-toggle="collapse" href="#submenu2">
+                            <i class="fas fa-file-alt"></i> Reports <span class="toggle-icon h7 ml-2"><i
+                                    class="fas fa-caret-down"></i></span> <span class="sr-only">(current)</span>
+                        </a>
+                        <div class="collapse" id="submenu2">
+                            <ul class="nav flex-column submenu">
+                                <li class="nav-item ">
+                                    <a class="nav-link text-light" href="{% url 'issue_receive' %}"><i
+                                            class="fas fa-chart-line"></i>Issues & Receive</a>
+                                </li>
+                                <li class="nav-item ">
+                                    <a class="nav-link text-light" href="{% url 'register' %}"><i
+                                            class="fas fa-users-cog"></i>Employee Reports</a>
+                                </li>
+                                <li class="nav-item ">
+                                    <a class="nav-link text-light" href="{% url 'register' %}"><i
+                                            class="fas fa-database"></i>Inventory Reports</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+
+
+
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 mt-4">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+
+<!-- <script src="{% static 'js/jquery-3.5.1.slim.min.js' %}"></script> -->
+<script src="{% static 'js/popper.min.js' %}"></script>
+<!-- <script src="{% static 'js/bootstrap4.min.js' %}"></script> -->
+<script src="{% static 'js/bootstrap-4.5.2.min.js' %}"></script> 
+
+
+</html>

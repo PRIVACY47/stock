@@ -1,0 +1,38 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+header {
+    background-color: #f8f9fa;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.sidebar {
+    background-color: #f8f9fa;
+    padding: 20px;
+    width: 200px;
+    position: fixed;
+    height: 100%;
+    overflow: auto;
+}
+
+.main-content {
+    margin-left: 220px; /* Same as the width of the sidebar + 20px for padding */
+    padding: 20px;
+}
+
+.inventory-card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.inventory-card h3 {
+    margin-bottom: 10px;
+}
+
+.inventory-card p {
+    margin: 0;
+}
